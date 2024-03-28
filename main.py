@@ -4,6 +4,7 @@
 #               zzsxd               #
 #####################################
 import platform
+import time
 import telebot
 from config_parser import ConfigParser
 import threading
@@ -13,13 +14,16 @@ config_name = 'secrets.json'
 ####################################################################
 
 
-def delete_msg(chat_id, msg_id):
+def delete_msg(chat_id, message):
     ss = 0
     while True:
+        ss += 1
+        if ss == 2:
+            msg_id = bot.reply_to(message, config.get_config()['start_msg'], parse_mode='HTML').message_id
         if ss == 40:
             bot.delete_message(chat_id, msg_id)
             break
-        ss += 1
+        time.sleep(1)
 
 
 def main():
@@ -27,8 +31,7 @@ def main():
     @bot.message_handler(content_types=["new_chat_members"])
     def foo(message):
         chat_id = message.chat.id
-        msg_id = bot.reply_to(message, config.get_config()['start_msg'], parse_mode='HTML').message_id
-        threading.Thread(target=delete_msg, args=(chat_id, msg_id))
+        threading.Thread(target=delete_msg, args=(chat_id, message)).start()
 
     @bot.message_handler(commands=['change'])
     def tovar_msg(message):
