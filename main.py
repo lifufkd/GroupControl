@@ -6,18 +6,29 @@
 import platform
 import telebot
 from config_parser import ConfigParser
+import threading
 from backend import TempUserData
 ####################################################################
 config_name = 'secrets.json'
 ####################################################################
 
 
+def delete_msg(chat_id, msg_id):
+    ss = 0
+    while True:
+        if ss == 40:
+            bot.delete_message(chat_id, msg_id)
+            break
+        ss += 1
+
+
 def main():
 
     @bot.message_handler(content_types=["new_chat_members"])
     def foo(message):
-        print(1)
-        bot.reply_to(message, config.get_config()['start_msg'], parse_mode='HTML')
+        chat_id = message.chat.id
+        msg_id = bot.reply_to(message, config.get_config()['start_msg'], parse_mode='HTML').message_id
+        threading.Thread(target=delete_msg, args=(chat_id, msg_id))
 
     @bot.message_handler(commands=['change'])
     def tovar_msg(message):
@@ -31,7 +42,6 @@ def main():
     def text_message(message):
         user_input = message.text
         user_id = message.from_user.id
-        print(3)
         if user_id in config.get_config()['admins'] and temp_data.temp_data(user_id)[user_id][0]:
             config.update_start_msg(user_input)
             temp_data.temp_data(user_id)[user_id][0] = False
