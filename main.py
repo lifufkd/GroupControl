@@ -20,7 +20,8 @@ def delete_msg(chat_id, message):
         ss += 1
         if ss == 2:
             msg_id = bot.reply_to(message, config.get_config()['start_msg'], parse_mode='HTML').message_id
-        if ss == 40:
+        if ss >= 40:
+            bot.delete_message(chat_id, message.message_id)
             bot.delete_message(chat_id, msg_id)
             break
         time.sleep(1)
